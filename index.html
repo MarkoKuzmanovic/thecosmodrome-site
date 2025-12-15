@@ -37,6 +37,8 @@
         html {
             font-size: 16px;
             scroll-behavior: smooth;
+            height: -webkit-fill-available;
+            -webkit-text-size-adjust: 100%;
         }
 
         body {
@@ -52,6 +54,16 @@
             color: var(--starlight);
             font-family: var(--font-body);
             overflow-x: hidden;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Fix for iOS Safari - background-attachment: fixed is broken */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                background-attachment: scroll;
+            }
         }
 
         /* Grain overlay */
@@ -206,6 +218,7 @@
         /* Hero - Left Alignment */
         .hero {
             min-height: 100vh;
+            min-height: 100svh;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -932,17 +945,29 @@
         }
 
         @media (max-width: 768px) {
+            /* Disable heavy effects on mobile for performance */
+            .dust-cloud {
+                display: none;
+            }
+
+            body::after {
+                opacity: 0.02;
+            }
+
             header {
-                padding: 1.5rem 2rem;
+                padding: 1.5rem 1.5rem;
             }
 
             .hero {
-                padding: 6rem 1.5rem;
+                padding: 5rem 1.5rem;
+                min-height: 100svh;
+                min-height: -webkit-fill-available;
             }
 
             .hero-title {
-                font-size: clamp(2rem, 14vw, 4rem);
-                margin-bottom: 2rem;
+                font-size: clamp(2.2rem, 13vw, 4rem);
+                margin-bottom: 1.5rem;
+                word-break: break-word;
             }
 
             .hero-subtitle {
@@ -950,26 +975,65 @@
                 max-width: 100%;
             }
 
-            .stats-section,
+            .hero-tag {
+                margin-bottom: 1.5rem;
+            }
+
+            .marquee-item {
+                padding: 0 1rem;
+                font-size: 0.65rem;
+            }
+
+            .stats-section {
+                padding: 4rem 1.5rem 2rem;
+            }
+
+            .stat-card {
+                padding: 2.5rem 2rem;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
             .transmissions-section,
             .projects-section {
-                padding-left: 2rem;
-                padding-right: 2rem;
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .projects-intro {
+                gap: 1.5rem;
+            }
+
+            .projects-intro-title {
+                font-size: 1.75rem;
+            }
+
+            .project-card {
+                padding: 2rem;
             }
 
             .cta-section {
-                margin: 0 2rem 6rem 2rem;
-                padding: 6rem 2rem;
+                margin: 0 1.5rem 4rem 1.5rem;
+                padding: 4rem 1.5rem;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
             }
 
             .transmission-item {
                 grid-template-columns: 1fr;
                 gap: 0.75rem;
-                padding: 1.5rem;
+                padding: 1.25rem;
             }
 
             .transmission-status {
@@ -989,13 +1053,44 @@
             }
 
             footer {
-                padding: 2rem;
+                padding: 2rem 1.5rem;
             }
 
             .footer-content {
                 flex-direction: column;
-                gap: 2rem;
+                gap: 1.5rem;
                 text-align: center;
+            }
+
+            .footer-links {
+                gap: 1.5rem;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 380px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero {
+                padding: 4rem 1rem;
+            }
+
+            header {
+                padding: 1.25rem 1rem;
+            }
+
+            .stats-section,
+            .transmissions-section,
+            .projects-section {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .cta-section {
+                margin: 0 1rem 3rem 1rem;
+                padding: 3rem 1rem;
             }
         }
     </style>
@@ -1226,28 +1321,35 @@
     </footer>
 
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        const heroElements = document.querySelectorAll('.hero-content');
-        const dustClouds = document.querySelectorAll('.dust-cloud');
+        // Disable parallax on mobile for performance
+        const isMobile = window.matchMedia('(max-width: 768px)').matches || 
+                         ('ontouchstart' in window) || 
+                         (navigator.maxTouchPoints > 0);
 
-        window.addEventListener('scroll', () => {
-            const scrollY = window.pageYOffset;
+        if (!isMobile) {
+            const heroElements = document.querySelectorAll('.hero-content');
+            const dustClouds = document.querySelectorAll('.dust-cloud');
 
-            // Parallax for Hero Text (Slower scroll, moving down)
-            heroElements.forEach(el => {
-                const speed = parseFloat(el.getAttribute('data-parallax-speed'));
-                if (!isNaN(speed)) {
-                    el.style.transform = `translateY(${scrollY * speed}px)`;
-                }
-            });
+            window.addEventListener('scroll', () => {
+                const scrollY = window.pageYOffset;
 
-            // Parallax for Dust Clouds (Faster scroll, moving up)
-            dustClouds.forEach(cloud => {
-                const speed = parseFloat(cloud.getAttribute('data-parallax-speed'));
-                if (!isNaN(speed)) {
-                    cloud.style.transform = `translateY(${scrollY * speed}px)`;
-                }
-            });
-        });
+                // Parallax for Hero Text (Slower scroll, moving down)
+                heroElements.forEach(el => {
+                    const speed = parseFloat(el.getAttribute('data-parallax-speed'));
+                    if (!isNaN(speed)) {
+                        el.style.transform = `translateY(${scrollY * speed}px)`;
+                    }
+                });
+
+                // Parallax for Dust Clouds (Faster scroll, moving up)
+                dustClouds.forEach(cloud => {
+                    const speed = parseFloat(cloud.getAttribute('data-parallax-speed'));
+                    if (!isNaN(speed)) {
+                        cloud.style.transform = `translateY(${scrollY * speed}px)`;
+                    }
+                });
+            }, { passive: true });
+        }
     </script>
 </body>
 </html>
